@@ -5,12 +5,62 @@ import img3 from '../img/img3.jpg'
 import {ReactComponent as FlechaIzquierda} from '../img/iconmonstr-arrow-left-lined.svg'
 import {ReactComponent as FlechaDerecha} from '../img/iconmonstr-arrow-right-lined.svg'
 import styled from 'styled-components';
+import { useRef } from 'react'
 
 
 const Slideshow = () =>{
+  const slideShow = useRef(null)
+
+  const siguiente = () => {
+    //Compruebo que el slideshow tenga elementos
+    if(slideShow.current.children.length > 0){
+      //Capturo el primer elemento
+      const primerElemento = slideShow.current.children[0];
+      //Agrego una transición
+      slideShow.current.style.transition = `500ms ease-out all`;
+
+      //Capturo el tamaño de ancho del slideShow
+      const tamañoSlide =  slideShow.current.children[0].offsetWidth;
+      //Mover el slideshow
+      slideShow.current.style.transform = `translateX(${-tamañoSlide}px)`
+
+      const transicion = () => {
+        //Reinicio la posición
+        slideShow.current.style.transition = `none`;
+        slideShow.current.style.transform = `translateX(0)`;
+        //Muevo el primer elemento del slideshow hacia el final
+        slideShow.current.appendChild(primerElemento);
+        slideShow.current.removeEventListener('transitionend',transicion);
+      }
+      slideShow.current.addEventListener('transitionend',transicion);
+    }
+  }
+
+  const anterior = () => {
+    if(slideShow.current.children.length>0){
+      //Obtener ultimo elemento
+      const index = slideShow.current.children.length -1;
+      const ultimoElement = slideShow.current.children[index]
+      slideShow.current.insertBefore(ultimoElement,slideShow.current.firstChild)
+
+      //Agrego una transición
+      slideShow.current.style.transition = `none`;
+
+      //Capturo el tamaño de ancho del slideShow
+      const tamañoSlide =  slideShow.current.children[0].offsetWidth;
+      //Mover el slideshow
+      slideShow.current.style.transform = `translateX(-${tamañoSlide}px)`;
+
+      setTimeout(()=>{
+        slideShow.current.style.transition = `300ms ease-out all`;
+        slideShow.current.style.transform = `translateX(0)`
+      },50)
+    }
+  }
+
   return(
     <ContenedorPrincipal>
-      <ContenedorSlide>
+      <ContenedorSlide ref={slideShow}>
         <Slide>
           <a href="https://www.facebook.com/fernando.ramos.3152" rel="noreferrer" target="_blank">
             <img src={img1} alt="img"></img>
@@ -37,10 +87,10 @@ const Slideshow = () =>{
         </Slide>
       </ContenedorSlide>
       <ControlesSlide>
-        <Boton>
+        <Boton onClick={anterior}>
           <FlechaIzquierda />
         </Boton>
-        <Boton derecho>
+        <Boton derecho onClick={siguiente}>
           <FlechaDerecha />
         </Boton>
       </ControlesSlide>
