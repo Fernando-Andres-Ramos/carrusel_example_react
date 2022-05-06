@@ -1,29 +1,33 @@
 import React from 'react'
-import img1 from '../img/img1.jpg'
-import img2 from '../img/img2.jpg'
-import img3 from '../img/img3.jpg'
+
 import {ReactComponent as FlechaIzquierda} from '../img/iconmonstr-arrow-left-lined.svg'
 import {ReactComponent as FlechaDerecha} from '../img/iconmonstr-arrow-right-lined.svg'
 import styled from 'styled-components';
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect,useCallback } from 'react'
 
 
-const Slideshow = () =>{
+const Slideshow = ({
+  children,
+  controles= true, 
+  tiempoIntervalo= 5000, 
+  autoplay = true, 
+  velocidad = 300
+  }) => {
   const slideShow = useRef(null)
 
-  const siguiente = () => {
+  const siguiente = useCallback (()=>{
     //Compruebo que el slideshow tenga elementos
     if(slideShow.current.children.length > 0){
       //Capturo el primer elemento
       const primerElemento = slideShow.current.children[0];
       //Agrego una transición
-      slideShow.current.style.transition = `500ms ease-out all`;
-
+      slideShow.current.style.transition = `${velocidad}ms ease-out all`;
+  
       //Capturo el tamaño de ancho del slideShow
       const tamañoSlide =  slideShow.current.children[0].offsetWidth;
       //Mover el slideshow
       slideShow.current.style.transform = `translateX(${-tamañoSlide}px)`
-
+  
       const transicion = () => {
         //Reinicio la posición
         slideShow.current.style.transition = `none`;
@@ -34,7 +38,7 @@ const Slideshow = () =>{
       }
       slideShow.current.addEventListener('transitionend',transicion);
     }
-  }
+  },[velocidad]);
 
   const anterior = () => {
     if(slideShow.current.children.length>0){
@@ -52,68 +56,48 @@ const Slideshow = () =>{
       slideShow.current.style.transform = `translateX(-${tamañoSlide}px)`;
 
       setTimeout(()=>{
-        slideShow.current.style.transition = `300ms ease-out all`;
+        slideShow.current.style.transition = `${velocidad}ms ease-out all`;
         slideShow.current.style.transform = `translateX(0)`
       },50)
     }
   }
 
   useEffect(()=>{
-    let intervalo = setInterval(()=>{
-      siguiente();
-    },5000);
-
-    //Eliminar intervalos
-
-    slideShow.current.addEventListener('mouseenter',()=>{
-      clearInterval(intervalo);
-    });
-
-    slideShow.current.addEventListener('mouseleave',()=>{
-      intervalo = setInterval(()=>{
+    if(autoplay){
+      let intervalo = setInterval(()=>{
         siguiente();
-      },5000);
-    });
+      },tiempoIntervalo);
+  
+      //Eliminar intervalos
+  
+      slideShow.current.addEventListener('mouseenter',()=>{
+        clearInterval(intervalo);
+      });
+  
+      slideShow.current.addEventListener('mouseleave',()=>{
+        intervalo = setInterval(()=>{
+          siguiente();
+        },tiempoIntervalo);
+      });
+      
+    }
 
     //Agrega intervalos
-  },[]);
+  },[autoplay,tiempoIntervalo,siguiente]);
 
   return(
     <ContenedorPrincipal>
       <ContenedorSlide ref={slideShow}>
-        <Slide>
-          <a href="https://www.facebook.com/fernando.ramos.3152" rel="noreferrer" target="_blank">
-            <img src={img1} alt="img"></img>
-          </a>
-          <TextoSlide  colorFondo="rgba(0,0,0,.3)" colorTexto="white">
-            <p>15% de descuento</p>
-          </TextoSlide>
-        </Slide>
-        <Slide>
-          <a href="https://www.facebook.com/fernando.ramos.3152" rel="noreferrer" target="_blank">
-            <img src={img2} alt="img"></img>
-          </a>
-          <TextoSlide>
-            <p>15% de descuento</p>
-          </TextoSlide>
-        </Slide>
-        <Slide>
-          <a href="https://www.facebook.com/fernando.ramos.3152" rel="noreferrer" target="_blank">
-            <img src={img3} alt="img"></img>
-          </a>
-          <TextoSlide>
-            <p>15% de descuento</p>
-          </TextoSlide>
-        </Slide>
+        {children}
       </ContenedorSlide>
-      <ControlesSlide>
+      {controles && <ControlesSlide>
         <Boton onClick={anterior}>
           <FlechaIzquierda />
         </Boton>
         <Boton derecho onClick={siguiente}>
           <FlechaDerecha />
         </Boton>
-      </ControlesSlide>
+      </ControlesSlide>}
     </ContenedorPrincipal>
   )
 }
@@ -189,4 +173,4 @@ const Boton = styled.button`
 `;
 
 
-export default Slideshow
+export {Slideshow,Slide,TextoSlide}
