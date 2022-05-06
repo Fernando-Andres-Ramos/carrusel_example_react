@@ -5,7 +5,7 @@ import img3 from '../img/img3.jpg'
 import {ReactComponent as FlechaIzquierda} from '../img/iconmonstr-arrow-left-lined.svg'
 import {ReactComponent as FlechaDerecha} from '../img/iconmonstr-arrow-right-lined.svg'
 import styled from 'styled-components';
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
 
 const Slideshow = () =>{
@@ -57,6 +57,26 @@ const Slideshow = () =>{
       },50)
     }
   }
+
+  useEffect(()=>{
+    let intervalo = setInterval(()=>{
+      siguiente();
+    },5000);
+
+    //Eliminar intervalos
+
+    slideShow.current.addEventListener('mouseenter',()=>{
+      clearInterval(intervalo);
+    });
+
+    slideShow.current.addEventListener('mouseleave',()=>{
+      intervalo = setInterval(()=>{
+        siguiente();
+      },5000);
+    });
+
+    //Agrega intervalos
+  },[]);
 
   return(
     <ContenedorPrincipal>
